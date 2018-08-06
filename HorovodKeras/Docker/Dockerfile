@@ -1,14 +1,14 @@
 FROM nvidia/cuda:9.0-devel-ubuntu16.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ENV TENSORFLOW_VERSION=1.8.0
-ENV CUDNN_VERSION=7.0.5.15-1+cuda9.0
 ENV PYTHON_VERSION=3.5
-ENV NCCL_VERSION=2.2.12-1+cuda9.0
+ENV TENSORFLOW_VERSION=1.9.0
+ENV CUDNN_VERSION=7.0.5.15-1+cuda9.0
+ENV NCCL_VERSION=2.2.13-1+cuda9.0
 
 RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
 
-RUN apt-get update && apt-get install -y --no-install-recommends --allow-downgrades \
+RUN apt-get update && apt-get install -y --no-install-recommends\
         build-essential \
         cmake \
         cpio \
