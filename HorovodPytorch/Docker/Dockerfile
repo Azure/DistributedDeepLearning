@@ -1,10 +1,9 @@
 FROM nvidia/cuda:9.0-devel-ubuntu16.04
 
 # TensorFlow version is tightly coupled to CUDA and cuDNN so it should be selected carefully
-ENV PYTHON_VERSION=3.5
 ENV CUDNN_VERSION=7.0.5.15-1+cuda9.0
 ENV NCCL_VERSION=2.2.13-1+cuda9.0
-
+ENV PYTORCH_VERSION=0.4.0
 ENV PYTHON_VERSION=3.5
 
 RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
@@ -33,7 +32,7 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
 
 
 # Install PyTorch
-RUN pip install http://download.pytorch.org/whl/cu90/torch-0.4.0-cp35-cp35m-linux_x86_64.whl && \
+RUN pip install http://download.pytorch.org/whl/cu90/torch-${PYTORCH_VERSION}-cp35-cp35m-linux_x86_64.whl && \
 	pip install --no-cache-dir torchvision h5py scipy jupyter ipykernel numpy toolz pandas scikit-learn pillow
 
 # Install Open MPI
