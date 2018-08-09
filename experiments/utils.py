@@ -12,8 +12,10 @@ import json
 
 def get_password(dotenv_path):
     if 'PASSWORD' not in dotenv_values(dotenv_path=dotenv_path):
+        print('Password not set')
         password = getpass('Please enter password to use for the cluster')
         _=set_key(dotenv_path, 'PASSWORD', password)
+    return get_key(dotenv_path, 'PASSWORD')
 
 
 def write_json_to_file(json_dict, filename, mode='w'):
