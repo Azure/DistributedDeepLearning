@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         jq \
         locales \
         git \
+        sshpass \
         openssh-client && \
      	rm -rf /var/lib/apt/lists/*
 

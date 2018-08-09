@@ -13,4 +13,5 @@ dependencies:
   - selenium
   - phantomjs
   - pillow
+  - python-dotenv[cli]
   - bokeh=0.13.0
