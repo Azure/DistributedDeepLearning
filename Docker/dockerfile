@@ -45,3 +45,12 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu
 	apt-key adv --keyserver packages.microsoft.com --recv-keys B02C46DF417A0893 &&\
 	apt-get update &&\
 	apt-get install -y --no-install-recommends azcopy
+
+#TODO add sshpass
+
+#TODO Remove strict host checking
+#In your ~/.ssh/config (if this file doesn't exist, just create it):
+#
+#Host *
+#    StrictHostKeyChecking no
+#
