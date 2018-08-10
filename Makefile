@@ -7,8 +7,8 @@ Usage:
 endef
 export PROJECT_HELP_MSG
 PWD:=$(shell pwd)
-
-image_name:=caia/distributed-training-control
+dockerhub:=
+image_name:=$(dockerhub)/distributed-training-control
 
 help:
 	echo "$$PROJECT_HELP_MSG" | less
