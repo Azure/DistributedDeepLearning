@@ -1,8 +1,8 @@
 define PROJECT_HELP_MSG
 Usage:
-    make help                   show this message
-    make build                  make Horovod TF image with Open MPI
-    make push					push Horovod TF image with Open MPI
+    make help                  show this message
+    make build                 make image
+    make push					push image
 endef
 export PROJECT_HELP_MSG
 
