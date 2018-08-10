@@ -1,3 +1,47 @@
+# Training Distributed Training on Batch AI
+
+This repo is a tutorial on how to train a CNN model in a distributed fashion using Batch AI. 
+
+## Prerequisites
+* Linux
+* Docker installed
+* Dockerhub account
+* Port 9999 open 
+
+## Setup 
+Before you begin make sure you are logged into your dockerhub account by running on your machine:
+
+```bash
+docker login 
+```
+
+### Setup Batch AI containers
+Before we do anything we need to create the conatiners that will run our code on Batch AI. You can do this by navigating to one of the framwork folders such as HorovodTF and running(replace any instace of <dockerhub account> with your own dockerhub account name):
+
+```bash
+make build dockerhub=<dockerhub account>
+```
+
+Then push the container to your registry with:
+
+```bash
+make push dockerhub=<dockerhub account>
+```
+
+### Setup Execution Environment
+Before being able to run anything you will need to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependecies for you. If you don't want to use Docker simply look inside the Docker directory at the dockerfile and environment.yml file for the dependencies. To build the container run(replace all instances of <dockerhub account> with your own dockerhub account name):
+
+```bash
+make build dockerhub=<dockerhub account>
+```
+
+```run
+make jupyter dockerhub=<dockerhub account>
+```
+
+This will start the jupyter notebook on port 9999. Simply point your browser to the IP or DNS of your machine. From there you can navigate to the folders for tutorials on the frameworks covered such a HorovodTF etc.
+
+
 
 # Contributing
 
