@@ -3,12 +3,10 @@ from getpass import getpass
 import os
 import json
 
-#
-# if dotenv_path == '':
-#     dotenv_path = '.env'
-#     with open(dotenv_path, 'a'):
-#         os.utime(dotenv_path)
 
+def dotenv_for():
+    dotenv_path = find_dotenv()
+    return '.env' if dotenv_path=='' else dotenv_path
 
 def get_password(dotenv_path):
     if 'PASSWORD' not in dotenv_values(dotenv_path=dotenv_path):
