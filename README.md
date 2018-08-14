@@ -16,7 +16,7 @@ docker login
 ```
 
 ### Setup Batch AI containers
-Before we do anything we need to create the conatiners that will run our code on Batch AI. You can do this by navigating to one of the framwork folders such as HorovodTF and running(replace any instace of <dockerhub account> with your own dockerhub account name):
+Before we do anything we need to create the containers that will run our code on Batch AI. You can do this by navigating to one of the framework folders such as HorovodTF and running(replace any instance of <dockerhub account> with your own dockerhub account name):
 
 ```bash
 make build dockerhub=<dockerhub account>
@@ -29,13 +29,13 @@ make push dockerhub=<dockerhub account>
 ```
 
 ### Setup Execution Environment
-Before being able to run anything you will need to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependecies for you. If you don't want to use Docker simply look inside the Docker directory at the dockerfile and environment.yml file for the dependencies. To build the container run(replace all instances of <dockerhub account> with your own dockerhub account name):
+Before being able to run anything you will need to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. If you don't want to use Docker simply look inside the Docker directory at the dockerfile and environment.yml file for the dependencies. To build the container run(replace all instances of <dockerhub account> with your own dockerhub account name):
 
 ```bash
 make build dockerhub=<dockerhub account>
 ```
 
-```run
+```bash
 make jupyter dockerhub=<dockerhub account>
 ```
 
