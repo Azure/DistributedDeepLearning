@@ -1,0 +1,37 @@
+{
+    "$schema": "https://raw.githubusercontent.com/Azure/BatchAI/master/schemas/2017-09-01-preview/job.json",
+    "properties": {
+        "containerSettings": {
+            "imageSourceRegistry": {
+                "image": "yzhang001/distributed-training.horovod-keras"
+            }
+        },
+        "customToolkitSettings": {
+            "commandLine": "source /opt/intel/compilers_and_libraries_2017.4.196/linux/mpi/intel64/bin/mpivars.sh;       echo $AZ_BATCH_HOST_LIST;       mpirun -n 8 -ppn 4 -hosts $AZ_BATCH_HOST_LIST       -env I_MPI_FABRICS=dapl       -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0       -env I_MPI_DYNAMIC_CONNECTION=0       -env I_MPI_DEBUG=6       -env I_MPI_HYDRA_DEBUG=on       -env DISTRIBUTED=True              python -u $AZ_BATCHAI_INPUT_SCRIPTS/imagenet_keras_horovod.py"
+        },
+        "inputDirectories": [
+            {
+                "id": "SCRIPTS",
+                "path": "$AZ_BATCHAI_MOUNT_ROOT/extfs/scripts"
+            },
+            {
+                "id": "TRAIN",
+                "path": "$AZ_BATCHAI_MOUNT_ROOT/nfs/imagenet"
+            },
+            {
+                "id": "TEST",
+                "path": "$AZ_BATCHAI_MOUNT_ROOT/nfs/imagenet"
+            }
+        ],
+        "nodeCount": 2,
+        "outputDirectories": [
+            {
+                "id": "MODEL",
+                "pathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/extfs",
+                "pathSuffix": "Models"
+            }
+        ],
+        "stdOutErrPathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/extfs"
+    }
+}
+
