@@ -5,7 +5,7 @@ This repo shows how to train a CNN model in a distributed fashion using [Azure B
 
 We train CNN models ([ResNet50](https://arxiv.org/abs/1512.03385)) using [Horovod](https://github.com/uber/horovod) on the [Imagenet](http://www.image-net.org/) dataset. When training CNN models, we use three DL frameworks for you to choose from: TensorFlow, Keras, or PyTorch.  
 
-Please follow following steps in sequence to proceed.
+To get started with the tutorial, please proceed with following steps **in sequential order**.
 
  * [Prerequisites](#prerequisites)
  * [Setup](#setup)
