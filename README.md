@@ -25,23 +25,8 @@ Before you begin make sure you are logged into your dockerhub account by running
 ```bash
 docker login 
 ```
-### Setup Execution Environment
-Before being able to run anything you will need to configure your machine (local host) to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. To build the image run (replace all instances of <dockerhub account> with your own dockerhub account name) following command in current directory:
-
-```bash
-make build dockerhub=<dockerhub account>
-```
-Then start the jupyter notebook on port 9999: 
-```bash
-make jupyter dockerhub=<dockerhub account>
-```
-
-By following the instructions shown in the output messages of above command, simply point your browser to the IP or DNS of your machine. From there you can navigate to the folders for tutorials on the frameworks covered such a HorovodTF etc.
-
-Alternatively, if you don't want to use Docker, you can look inside the Docker directory at the dockerfile and environment.yml file for the dependencies.
-
 ### Setup Batch AI Images
-We need to create the images that will run our code on Batch AI. For every framework, you first navigate to its corresponding directory and then build the docker image. Taking TensorFlow model as an example, you navigate to [HorovodTF folder](./HorovodTF) and run following command to build the image (replace any instance of <dockerhub account> with your own dockerhub account name):
+We need to create the images that will run our code on Batch AI. For chosen framework, you first navigate to its corresponding directory and then build the docker image. Taking TensorFlow model as an example, you navigate to [HorovodTF folder](./HorovodTF) and run following command to build the image (replace any instance of <dockerhub account> with your own dockerhub account name):
 
 ```bash
 make build dockerhub=<dockerhub account>
@@ -53,6 +38,20 @@ Then push the image to your registry with:
 make push dockerhub=<dockerhub account>
 ```
 
+### Setup Execution Environment
+Before being able to run anything you will need to configure your machine (local host) to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. To build the image run (replace all instances of <dockerhub account> with your own dockerhub account name) following command in current directory:
+
+```bash
+make build dockerhub=<dockerhub account>
+```
+Then start the jupyter notebook on port 9999: 
+```bash
+make jupyter dockerhub=<dockerhub account>
+```
+
+By following the instructions shown in the output messages of above command, simply point your browser to the IP or DNS of your machine. From there you can navigate to the folders for tutorials on the frameworks covered such as HorovodTF etc.
+
+Alternatively, if you don't want to use Docker, you can look inside the Docker directory at the dockerfile and environment.yml file for the dependencies.
 
 # Contributing
 
