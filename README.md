@@ -1,47 +1,57 @@
 # Training Distributed Training on Batch AI
+Object recognition in images is a widely applied technique in computer vision applications. It is often implemented by training a convolutional deep neural network (CNN). The training process can take up to weeks on a single GPU, not to mention the the prohibitively long time needed when performing hyperparameter tuning or experimenting with model architectures.
 
-This repo is a tutorial on how to train a CNN model in a distributed fashion using Batch AI. 
+This repo shows how to train a CNN model in a distributed fashion using [Azure Batch AI](https://docs.microsoft.com/en-us/azure/batch-ai/overview), a managed service that enables deep learning (DL) models to be trained on clusters of Azure virtual machines, including VMs with GPU support. 
 
+We train CNN models ([ResNet50](https://arxiv.org/abs/1512.03385)) using [Horovod](https://github.com/uber/horovod) on the [Imagenet](http://www.image-net.org/) dataset. When training CNN models, we use three DL frameworks for you to choose from: TensorFlow, Keras, or PyTorch.  
+
+To get started with the tutorial, please proceed with following steps **in sequential order**.
+
+ * [Prerequisites](#prerequisites)
+ * [Setup](#setup)
+ * [TensorFlow version](./HorovodTF)  or [Keras version](./HorovodKeras), or [PyTorch version](./HorovodPytorch) 
+
+<a id='prerequisites'></a>
 ## Prerequisites
-* Linux
+* Local host machine OS: Linux
 * Docker installed
-* Dockerhub account
+* [Dockerhub](https://hub.docker.com/) account
 * Port 9999 open 
 
+<a id='setup'></a>
 ## Setup 
 Before you begin make sure you are logged into your dockerhub account by running on your machine:
 
 ```bash
 docker login 
 ```
-
-### Setup Batch AI containers
-Before we do anything we need to create the containers that will run our code on Batch AI. You can do this by navigating to one of the framework folders such as HorovodTF and running(replace any instance of <dockerhub account> with your own dockerhub account name):
+### Setup Batch AI Images
+We need to create the images that will run our code on Batch AI. For chosen framework, you first navigate to its corresponding directory and then build the docker image. Taking TensorFlow model as an example, you navigate to [HorovodTF folder](./HorovodTF) and run following command to build the image (replace any instance of <dockerhub account> with your own dockerhub account name):
 
 ```bash
 make build dockerhub=<dockerhub account>
 ```
 
-Then push the container to your registry with:
+Then push the image to your registry with:
 
 ```bash
 make push dockerhub=<dockerhub account>
 ```
 
 ### Setup Execution Environment
-Before being able to run anything you will need to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. If you don't want to use Docker simply look inside the Docker directory at the dockerfile and environment.yml file for the dependencies. To build the container run(replace all instances of <dockerhub account> with your own dockerhub account name):
+Before being able to run anything you will need to configure your machine (local host) to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. To build the image run (replace all instances of <dockerhub account> with your own dockerhub account name) following command in current directory:
 
 ```bash
 make build dockerhub=<dockerhub account>
 ```
-
+Then start the jupyter notebook on port 9999: 
 ```bash
 make jupyter dockerhub=<dockerhub account>
 ```
 
-This will start the jupyter notebook on port 9999. Simply point your browser to the IP or DNS of your machine. From there you can navigate to the folders for tutorials on the frameworks covered such a HorovodTF etc.
+By following the instructions shown in the output messages of above command, simply point your browser to the IP or DNS of your machine. From there you can navigate to the folders for tutorials on the frameworks covered such as HorovodTF etc.
 
-
+Alternatively, if you don't want to use Docker, you can look inside the Docker directory at the dockerfile and environment.yml file for the dependencies.
 
 # Contributing
 
