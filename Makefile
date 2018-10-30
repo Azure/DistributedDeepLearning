@@ -18,7 +18,7 @@ build:
 	docker build -t $(image_name) Docker
 
 jupyter:
-	docker run -p 9999:9999 -v $(PWD):/workspace -it $(image_name) bash -c "jupyter notebook --port=9999 --ip=* --no-browser --allow-root"
+	docker run -p 9999:9999 -v $(PWD):/workspace -it $(image_name) bash -c "jupyter notebook --port=9999 --ip=0.0.0.0 --no-browser --allow-root"
 
 run:
 	docker run -p 9999:9999 -v $(PWD):/workspace -it $(image_name) bash
