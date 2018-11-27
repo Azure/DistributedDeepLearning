@@ -1,10 +1,10 @@
 define PROJECT_HELP_MSG
 Usage:
-    make help                   show this message
-    make build                  build docker image
-    make push					 push container
-    make run					 run benchmarking container
-    make jupyter                run jupyter notebook inside container
+    make help                  show this message
+    make build                 build docker image
+    make push                  push container
+    make run                   run benchmarking container
+    make jupyter               run jupyter notebook inside container
 endef
 export PROJECT_HELP_MSG
 PWD:=$(shell pwd)
