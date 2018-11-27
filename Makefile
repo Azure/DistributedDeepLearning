@@ -9,6 +9,7 @@ endef
 export PROJECT_HELP_MSG
 PWD:=$(shell pwd)
 dockerhub:=
+data:=
 image_name:=$(dockerhub)/distributed-training-control
 
 help:
@@ -20,12 +21,14 @@ build:
 jupyter:
 	docker run -p 9999:9999 \
 	           -v $(PWD):/workspace \
+	           -v $(data):/data \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
 	           -it $(image_name) bash -c "jupyter notebook"
 
 run:
 	docker run -p 9999:9999 \
 	           -v $(PWD):/workspace \
+	           -v $(data):/data \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
 	           -it $(image_name)
 
