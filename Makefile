@@ -20,6 +20,7 @@ build:
 
 jupyter:
 	docker run -p 9999:9999 \
+	           -e PWD=$(PWD) \
 	           -v $(PWD):/workspace \
 	           -v $(data):/data \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
@@ -27,6 +28,7 @@ jupyter:
 
 run:
 	docker run -p 9999:9999 \
+	           -e PWD=$(PWD) \
 	           -v $(PWD):/workspace \
 	           -v $(data):/data \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
