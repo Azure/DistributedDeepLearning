@@ -66,6 +66,7 @@ def _get_rank():
         return 0
 
 
+
 class HorovodAdapter(logging.LoggerAdapter):
     def __init__(self, logger):
         self._str_epoch = ""
