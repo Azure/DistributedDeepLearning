@@ -23,11 +23,10 @@
 import sys
 sys.path.append("../common") 
 
-from dotenv import dotenv_values, set_key, find_dotenv, get_key
-from getpass import getpass
+from dotenv import set_key
 import os
 import json
-from utils import get_password, write_json_to_file, dotenv_for
+from utils import get_password, dotenv_for
 from pathlib import Path
 # -
 
@@ -37,7 +36,7 @@ from pathlib import Path
 
 # + {"tags": ["parameters"]}
 # Variables for Batch AI - change as necessary
-ID                     = "ddpytorch"
+ID                     = "dtdemo"
 GROUP_NAME             = f"batch{ID}rg"
 STORAGE_ACCOUNT_NAME   = f"batch{ID}st"
 FILE_SHARE_NAME        = f"batch{ID}share"
@@ -50,16 +49,23 @@ GPU_TYPE               = "V100"
 PROCESSES_PER_NODE     = 4
 LOCATION               = "eastus"
 NFS_NAME               = f"batch{ID}nfs"
-EXPERIMENT             = f"distributed_pytorch_{GPU_TYPE}"
 USERNAME               = "batchai_user"
-USE_FAKE               = False
-DOCKERHUB              = "masalvar" #"<YOUR DOCKERHUB>"
-DATA                   = Path("/data/imagenet")
+USE_FAKE               = True
+DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")  #"<YOUR DOCKERHUB>"
+DATA                   = Path("/data")
 CONTAINER_NAME         = f"batch{ID}container"
-# -
+DOCKER_PWD = ""
 
-FAKE='-env FAKE=True' if USE_FAKE else ''
-TOTAL_PROCESSES = PROCESSES_PER_NODE * NUM_NODES
+dotenv_path = dotenv_for()
+set_key(dotenv_path, 'DOCKER_PWD', DOCKER_PWD)
+set_key(dotenv_path, 'GROUP_NAME', GROUP_NAME)
+set_key(dotenv_path, 'FILE_SHARE_NAME', FILE_SHARE_NAME)
+set_key(dotenv_path, 'WORKSPACE', WORKSPACE)
+set_key(dotenv_path, 'NUM_NODES', NUM_NODES)
+set_key(dotenv_path, 'CLUSTER_NAME', CLUSTER_NAME)
+set_key(dotenv_path, 'GPU_TYPE', GPU_TYPE)
+set_key(dotenv_path, 'PROCESSES_PER_NODE', PROCESSES_PER_NODE)
+# -
 
 # <a id='azure_resources'></a>
 # ## Create Azure Resources
@@ -108,7 +114,8 @@ storage_account_key = json.loads(''.join([i for i in json_data if 'WARNING' not 
 # <a id='upload_data'></a>
 # ## Upload Data to Blob (Optional)
 # In this section we will create a blob container and upload the imagenet data we prepared locally in the previous notebook.
-
+if USE_FAKE:
+    raise Warning("You should not be running this section if you simply want to use fake data")
 !az storage container create --account-name {STORAGE_ACCOUNT_NAME} \
                              --account-key {storage_account_key} \
                              --name {CONTAINER_NAME}
@@ -164,6 +171,10 @@ with open('nodeprep.sh', 'w') as f:
     f.write(nodeprep_script)
 
 # Next we will copy the file over and run it on the NFS VM. This will install azcopy and download and prepare the data
+
+
+if USE_FAKE:
+    raise Warning("You should not be running this section if you simply want to use fake data")
 
 !sshpass -p {get_password(dotenv_for())} scp -o "StrictHostKeyChecking=no" nodeprep.sh $USERNAME@{nfs_ip}:~/
 

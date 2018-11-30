@@ -19,11 +19,9 @@
 import sys
 sys.path.append("../common") 
 
-from dotenv import dotenv_values, set_key, find_dotenv, get_key
-from getpass import getpass
+from dotenv import get_key
 import os
-import json
-from utils import get_password, write_json_to_file, dotenv_for
+from utils import dotenv_for
 import docker
 # -
 
@@ -32,9 +30,11 @@ import docker
 # Set the USE_FAKE to True if you want to use fake data rather than the Imagenet dataset. This is often a good way to debug your models as well as checking what IO overhead is.
 
 # + {"tags": ["parameters"]}
-USE_FAKE               = False
-DOCKERHUB              = "masalvar" #"<YOUR DOCKERHUB>"
-NUM_PROCESSES = 2
+dotenv_path = dotenv_for()
+USE_FAKE               = True
+DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")  #"<YOUR DOCKERHUB>"
+NUM_PROCESSES          = 2
+DOCKER_PWD             = get_key(dotenv_path, 'DOCKER_PWD')
 # -
 
 dc = docker.from_env()
@@ -88,6 +88,6 @@ if container.status is 'running':
 
 for line in dc.images.push(image.tags[0], 
                            stream=True,
-                           auth_config={"username":DOCKERHUB,
-                                        "password": "d13NHAL!"}):
+                           auth_config={"username": DOCKERHUB,
+                                        "password": DOCKER_PWD}):
     print(line)

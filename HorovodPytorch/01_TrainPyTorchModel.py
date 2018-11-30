@@ -24,11 +24,9 @@
 import sys
 sys.path.append("../common") 
 
-from dotenv import dotenv_values, set_key, find_dotenv, get_key
-from getpass import getpass
+from dotenv import get_key
 import os
-import json
-from utils import get_password, write_json_to_file, dotenv_for
+from utils import write_json_to_file, dotenv_for
 # -
 
 # Below are the variables that describe our experiment. By default we are using the NC24rs_v3 (Standard_NC24rs_v3) VMs which have V100 GPUs and Infiniband. By default we are using 2 nodes with each node having 4 GPUs, this equates to 8 GPUs. Feel free to increase the number of nodes but be aware what limitations your subscription may have.
@@ -37,23 +35,18 @@ from utils import get_password, write_json_to_file, dotenv_for
 
 # + {"tags": ["parameters"]}
 # Variables for Batch AI - change as necessary
-ID                     = "ddpytorch"
-GROUP_NAME             = f"batch{ID}rg"
-STORAGE_ACCOUNT_NAME   = f"batch{ID}st"
-FILE_SHARE_NAME        = f"batch{ID}share"
-SELECTED_SUBSCRIPTION  = "Team Danielle Internal" #"<YOUR SUBSCRIPTION>"
-WORKSPACE              = "workspace"
-NUM_NODES              = 2
-CLUSTER_NAME           = "msv100"
-VM_SIZE                = "Standard_NC24rs_v3"
-GPU_TYPE               = "V100"
-PROCESSES_PER_NODE     = 4
-LOCATION               = "eastus"
-NFS_NAME               = f"batch{ID}nfs"
+dotenv_path = dotenv_for()
+GROUP_NAME             = get_key(dotenv_path, 'GROUP_NAME')
+FILE_SHARE_NAME        = get_key(dotenv_path, 'FILE_SHARE_NAME')
+WORKSPACE              = get_key(dotenv_path, 'WORKSPACE')
+NUM_NODES              = get_key(dotenv_path, 'NUM_NODES')
+CLUSTER_NAME           = get_key(dotenv_path, 'CLUSTER_NAME')
+GPU_TYPE               = get_key(dotenv_path, 'GPU_TYPE')
+PROCESSES_PER_NODE     = get_key(dotenv_path, 'PROCESSES_PER_NODE')
+
 EXPERIMENT             = f"distributed_pytorch_{GPU_TYPE}"
-USERNAME               = "batchai_user"
 USE_FAKE               = False
-DOCKERHUB              = "caia" #"<YOUR DOCKERHUB>"
+DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")  #"<YOUR DOCKERHUB>"
 # -
 
 FAKE='-env FAKE=True' if USE_FAKE else ''
@@ -120,7 +113,7 @@ jobs_dict = {
     }],
     "containerSettings": {
       "imageSourceRegistry": {
-        "image": f"{DOCKERHUB}/distributed-training.horovod-pytorch"
+        "image": f"{DOCKERHUB}/caia-horovod-pytorch"
       }
     }
   }

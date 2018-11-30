@@ -14,7 +14,7 @@
 
 from pathlib import Path
 
-DATA=Path("/data/imagenet")
+DATA=Path("/data")
 
 !rm -r {DATA / "train.tar.gz"}
 
@@ -54,8 +54,4 @@ validation_preparation_script = Path(os.getcwd())/"valprep.sh"
 
 !cd {DATA} && tar -czvf validation.tar.gz validation
 
-SUBSCRIPTION="Boston Team Danielle"
 
-!az login -o table
-
-!az account set -s ${SUBSCRIPTION}
