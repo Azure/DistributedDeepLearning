@@ -22,7 +22,7 @@ import torch.optim as optim
 import torch.utils.data.distributed
 import torchvision.models as models
 from torch.utils.data import Dataset
-from torchvision import transforms
+from torchvision import transforms, datasets
 
 
 def _str_to_bool(in_str):
