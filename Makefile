@@ -22,6 +22,7 @@ jupyter:
 	docker run -p 9999:9999 \
 	           -e EXT_PWD=$(PWD) \
 	           -e EXT_DATA=$(data) \
+	           -e DOCKER_REPOSITORY=$(dockerhub) \
 	           -v $(PWD):/workspace \
 	           -v $(data):/data \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
@@ -31,6 +32,7 @@ run:
 	docker run -p 9999:9999 \
 	           -e EXT_PWD=$(PWD) \
 	           -e EXT_DATA=$(data) \
+	           -e DOCKER_REPOSITORY=$(dockerhub) \
 	           -v $(PWD):/workspace \
 	           -v $(data):/data \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
