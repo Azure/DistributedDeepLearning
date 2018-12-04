@@ -1,5 +1,7 @@
-# Training Distributed Training on Batch AI
-Object recognition in images is a widely applied technique in computer vision applications. It is often implemented by training a convolutional deep neural network (CNN). The training process can take up to weeks on a single GPU, not to mention the the prohibitively long time needed when performing hyperparameter tuning or experimenting with model architectures.
+### Authors: Mathew Salvaris, Ilia Karmanov, Miguel González-Fierro
+
+# Training Distributed Deep Learning Models on Batch AI
+Object recognition in images is a widely applied technique in computer vision applications. It is often implemented by training a convolutional deep neural network (CNN). The training process can take up to weeks on a single GPU, not to mention the prohibitively long time needed when performing hyperparameter tuning or experimenting with model architectures.
 
 This repo shows how to train a CNN model in a distributed fashion using [Azure Batch AI](https://docs.microsoft.com/en-us/azure/batch-ai/overview), a managed service that enables deep learning (DL) models to be trained on clusters of Azure virtual machines, including VMs with GPU support. 
 
