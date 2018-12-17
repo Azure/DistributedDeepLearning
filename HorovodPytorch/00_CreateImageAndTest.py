@@ -13,7 +13,9 @@
 # ---
 
 # # Create Docker Image for PyTorch
-# In this notebook we will create the image for our PyTorch script to run in. We will go through the process of creating the image and testing it locally to make sure it runs before submitting it to the cluster. It is often recommended you do this rather than debugging on the cluster since debugging on a cluster can be much more difficult and time consuming.
+# In this notebook we will create the Docker image for our PyTorch script to run in. We will go through the process of creating the image and testing it locally to make sure it runs before submitting it to the cluster. It is often recommended you do this rather than debugging on the cluster since debugging on a cluster can be much more difficult and time consuming.
+#  
+# **You will need to be running everything on a GPU enabled VM to run this notebook.** 
 
 # +
 import sys
@@ -25,14 +27,12 @@ from utils import dotenv_for
 import docker
 # -
 
-# Below are the variables that describe our experiment. By default we are using the NC24rs_v3 (Standard_NC24rs_v3) VMs which have V100 GPUs and Infiniband. By default we are using 2 nodes with each node having 4 GPUs, this equates to 8 GPUs. Feel free to increase the number of nodes but be aware what limitations your subscription may have.
-#
-# Set the USE_FAKE to True if you want to use fake data rather than the Imagenet dataset. This is often a good way to debug your models as well as checking what IO overhead is.
+# We will use fake data here since we don't want to have to download the data etc. Using fake data is often a good way to debug your models as well as checking what IO overhead is. Here we are setting the number of processes (NUM_PROCESSES) to 2 since the VM we are testing on has 2 GPUs. If you are running on a machine with 1 GPU set NUM_PROCESSES to 1.
 
 # + {"tags": ["parameters"]}
 dotenv_path = dotenv_for()
 USE_FAKE               = True
-DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")  #"<YOUR DOCKERHUB>"
+DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")
 NUM_PROCESSES          = 2
 DOCKER_PWD             = get_key(dotenv_path, 'DOCKER_PWD')
 # -
@@ -41,8 +41,6 @@ dc = docker.from_env()
 
 image, log_iter = dc.images.build(path='Docker', 
                           tag='{}/caia-horovod-pytorch'.format(DOCKERHUB))
-
-image.tags[0]
 
 # +
 container_labels = {'containerName': 'pytorchgpu'}
@@ -79,13 +77,18 @@ container = dc.containers.run(image.tags[0],
                               shm_size='8G',
                               privileged=True)
 
+# With the code below we are simply monitoring what is happening in the container. Feel free to stop the notebook when you are happy that everything is working.
+
+# + {"tags": ["stripout"]}
 for line in container.logs(stderr=True, stream=True):
     print(line.decode("utf-8"),end ="")
+# -
 
 container.reload() # Refresh state
 if container.status is 'running':
     container.kill()
 
+# + {"tags": ["stripout"]}
 for line in dc.images.push(image.tags[0], 
                            stream=True,
                            auth_config={"username": DOCKERHUB,

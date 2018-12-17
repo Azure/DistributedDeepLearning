@@ -14,9 +14,8 @@
 
 # # Train PyTorch Model Distributed on Batch AI
 # In this notebook we will train a PyTorch model ([ResNet50](https://arxiv.org/abs/1512.03385)) in a distributed fashion using [Horovod](https://github.com/uber/horovod) on the Imagenet dataset. This tutorial will take you through the following steps:
-#  * [Create Azure Resources](#azure_resources)
-#  * [Create Fileserver(NFS)](#create_fileshare)
-#  * [Configure Batch AI Cluster](#configure_cluster)
+#  * [Create Experiment](#experiment)
+#  * [Upload Training Scripts](#training_scripts)
 #  * [Submit and Monitor Job](#job)
 #  * [Clean Up Resources](#clean_up)
 
@@ -24,13 +23,12 @@
 import sys
 sys.path.append("../common") 
 
+import json
 from dotenv import get_key
 import os
 from utils import write_json_to_file, dotenv_for
 # -
 
-# Below are the variables that describe our experiment. By default we are using the NC24rs_v3 (Standard_NC24rs_v3) VMs which have V100 GPUs and Infiniband. By default we are using 2 nodes with each node having 4 GPUs, this equates to 8 GPUs. Feel free to increase the number of nodes but be aware what limitations your subscription may have.
-#
 # Set the USE_FAKE to True if you want to use fake data rather than the Imagenet dataset. This is often a good way to debug your models as well as checking what IO overhead is.
 
 # + {"tags": ["parameters"]}
@@ -39,29 +37,42 @@ dotenv_path = dotenv_for()
 GROUP_NAME             = get_key(dotenv_path, 'GROUP_NAME')
 FILE_SHARE_NAME        = get_key(dotenv_path, 'FILE_SHARE_NAME')
 WORKSPACE              = get_key(dotenv_path, 'WORKSPACE')
-NUM_NODES              = get_key(dotenv_path, 'NUM_NODES')
+NUM_NODES              = int(get_key(dotenv_path, 'NUM_NODES'))
 CLUSTER_NAME           = get_key(dotenv_path, 'CLUSTER_NAME')
 GPU_TYPE               = get_key(dotenv_path, 'GPU_TYPE')
-PROCESSES_PER_NODE     = get_key(dotenv_path, 'PROCESSES_PER_NODE')
+PROCESSES_PER_NODE     = int(get_key(dotenv_path, 'PROCESSES_PER_NODE'))
+STORAGE_ACCOUNT_NAME   = get_key(dotenv_path, 'STORAGE_ACCOUNT_NAME')
 
 EXPERIMENT             = f"distributed_pytorch_{GPU_TYPE}"
 USE_FAKE               = False
 DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")  #"<YOUR DOCKERHUB>"
 # -
 
-FAKE='-env FAKE=True' if USE_FAKE else ''
+FAKE='-x FAKE=True' if USE_FAKE else ''
 TOTAL_PROCESSES = PROCESSES_PER_NODE * NUM_NODES
 
+# <a id='experiment'></a>
+# # Create Experiment
 # Next we create our experiment.
 
 !az batchai experiment create -n $EXPERIMENT -g $GROUP_NAME -w $WORKSPACE
 
-# Upload the relevant scripts
+# <a id='training_scripts'></a>
+# # Upload Training Scripts
+# We need to upload our training scripts and associated files
+
+json_data = !az storage account keys list -n $STORAGE_ACCOUNT_NAME -g $GROUP_NAME
+storage_account_key = json.loads(''.join([i for i in json_data if 'WARNING' not in i]))[0]['value']
+
+# + {"tags": ["stripout"]}
+# %env AZURE_STORAGE_ACCOUNT $STORAGE_ACCOUNT_NAME
+# %env AZURE_STORAGE_KEY=$storage_account_key
+# -
+
+# Upload our training scripts
 
 !az storage file upload --share-name $FILE_SHARE_NAME --source src/imagenet_pytorch_horovod.py --path scripts
 !az storage file upload --share-name $FILE_SHARE_NAME --source ../common/timer.py --path scripts
-!az storage file upload --share-name $FILE_SHARE_NAME --source cluster_config/docker.service --path scripts
-!az storage file upload --share-name $FILE_SHARE_NAME --source cluster_config/nodeprep.sh --path scripts
 
 # Let's check our cluster we created earlier
 
@@ -125,7 +136,9 @@ JOB_NAME='pytorch-horovod-{}'.format(NUM_NODES*PROCESSES_PER_NODE)
 
 # We now submit the job to Batch AI
 
+# + {"tags": ["stripout"]}
 !az batchai job create -n $JOB_NAME --cluster $CLUSTER_NAME -w $WORKSPACE -e $EXPERIMENT -f job.json
+# -
 
 # With the command below we can check the status of the job
 
@@ -133,13 +146,18 @@ JOB_NAME='pytorch-horovod-{}'.format(NUM_NODES*PROCESSES_PER_NODE)
 
 # To view the files that the job has generated use the command below
 
+# + {"tags": ["stripout"]}
 !az batchai job file list -w $WORKSPACE -e $EXPERIMENT --j $JOB_NAME --output-directory-id stdouterr
+# -
 
 # We are also able to stream the stdout and stderr that our job produces. This is great to check the progress of our job as well as debug issues.
 
+# + {"tags": ["stripout"]}
 !az batchai job file stream -w $WORKSPACE -e $EXPERIMENT --j $JOB_NAME --output-directory-id stdouterr -f stdout.txt
 
+# + {"tags": ["stripout"]}
 !az batchai job file stream -w $WORKSPACE -e $EXPERIMENT --j $JOB_NAME --output-directory-id stdouterr -f stderr.txt
+# -
 
 # We can either wait for the job to complete or delete it with the command below.
 

@@ -13,15 +13,15 @@
 # ---
 
 # # Create Azure and Batch AI Resources
-# In this notebook we will create the necessary resources to train a ResNet50 model([ResNet50](https://arxiv.org/abs/1512.03385)) in a distributed fashion using [Horovod](https://github.com/uber/horovod) on the Imagenet dataset. If you plan on using fake data then the sections marked optional can be skipped. This notebook will take you through the following steps:
+# In this notebook we will create the necessary resources to train a ResNet50 model([ResNet50](https://arxiv.org/abs/1512.03385)) in a distributed fashion using [Horovod](https://github.com/uber/horovod) on the ImageNet dataset. If you plan on using fake data then the sections marked optional can be skipped. This notebook will take you through the following steps:
 #  * [Create Azure Resources](#azure_resources)
-#  * [Create Fileserver(NFS)(Optional)](#create_fileshare)
+#  * [Create Fileserver(NFS)](#create_fileshare)
 #  * [Upload Data to Blob (Optional)](#upload_data)
 #  * [Configure Batch AI Cluster](#configure_cluster)
 
 # +
 import sys
-sys.path.append("../common") 
+sys.path.append("common") 
 
 from dotenv import set_key
 import os
@@ -40,7 +40,7 @@ ID                     = "dtdemo"
 GROUP_NAME             = f"batch{ID}rg"
 STORAGE_ACCOUNT_NAME   = f"batch{ID}st"
 FILE_SHARE_NAME        = f"batch{ID}share"
-SELECTED_SUBSCRIPTION  = "Boston Team Danielle" #"<YOUR SUBSCRIPTION>"
+SELECTED_SUBSCRIPTION  = "Boston Team Danielle"
 WORKSPACE              = "workspace"
 NUM_NODES              = 2
 CLUSTER_NAME           = "msv100"
@@ -50,34 +50,39 @@ PROCESSES_PER_NODE     = 4
 LOCATION               = "eastus"
 NFS_NAME               = f"batch{ID}nfs"
 USERNAME               = "batchai_user"
-USE_FAKE               = True
-DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")  #"<YOUR DOCKERHUB>"
+USE_FAKE               = False
+DOCKERHUB              = os.getenv('DOCKER_REPOSITORY', "masalvar")
 DATA                   = Path("/data")
 CONTAINER_NAME         = f"batch{ID}container"
-DOCKER_PWD = ""
+DOCKER_PWD             = "<YOUR_DOCKER_PWD>"
 
 dotenv_path = dotenv_for()
 set_key(dotenv_path, 'DOCKER_PWD', DOCKER_PWD)
 set_key(dotenv_path, 'GROUP_NAME', GROUP_NAME)
 set_key(dotenv_path, 'FILE_SHARE_NAME', FILE_SHARE_NAME)
 set_key(dotenv_path, 'WORKSPACE', WORKSPACE)
-set_key(dotenv_path, 'NUM_NODES', NUM_NODES)
+set_key(dotenv_path, 'NUM_NODES', str(NUM_NODES))
 set_key(dotenv_path, 'CLUSTER_NAME', CLUSTER_NAME)
 set_key(dotenv_path, 'GPU_TYPE', GPU_TYPE)
-set_key(dotenv_path, 'PROCESSES_PER_NODE', PROCESSES_PER_NODE)
+set_key(dotenv_path, 'PROCESSES_PER_NODE', str(PROCESSES_PER_NODE))
+set_key(dotenv_path, 'STORAGE_ACCOUNT_NAME', STORAGE_ACCOUNT_NAME)
 # -
 
 # <a id='azure_resources'></a>
 # ## Create Azure Resources
 # First we need to log in to our Azure account. 
 
+# + {"tags": ["stripout"]}
 !az login -o table
+# -
 
 # If you have more than one Azure account you will need to select it with the command below. If you only have one account you can skip this step.
 
 !az account set --subscription "$SELECTED_SUBSCRIPTION"
 
+# + {"tags": ["stripout"]}
 !az account list -o table
+# -
 
 # Next we create the group that will hold all our Azure resources.
 
@@ -103,38 +108,52 @@ storage_account_key = json.loads(''.join([i for i in json_data if 'WARNING' not 
 !az configure --defaults location=$LOCATION
 !az configure --defaults group=$GROUP_NAME
 
+# + {"tags": ["stripout"]}
 # %env AZURE_STORAGE_ACCOUNT $STORAGE_ACCOUNT_NAME
 # %env AZURE_STORAGE_KEY=$storage_account_key
+# -
 
 # #### Create Workspace
 # Batch AI has the concept of workspaces and experiments. Below we will create the workspace for our work.
 
+# + {"tags": ["stripout"]}
 !az batchai workspace create -n $WORKSPACE -g $GROUP_NAME
+# -
 
 # <a id='upload_data'></a>
 # ## Upload Data to Blob (Optional)
 # In this section we will create a blob container and upload the imagenet data we prepared locally in the previous notebook.
-if USE_FAKE:
-    raise Warning("You should not be running this section if you simply want to use fake data")
-!az storage container create --account-name {STORAGE_ACCOUNT_NAME} \
-                             --account-key {storage_account_key} \
-                             --name {CONTAINER_NAME}
+#
+# **You only need to run this section if you want to use real data. If USE_FAKE is set to False the commands below won't be executed.**
+#
 
-# Should take about 20 minnutes
-!azcopy --source {DATA/"train.tar.gz"} \
---destination https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{CONTAINER_NAME}/train.tar.gz \
---dest-key {storage_account_key} --quiet
+if USE_FAKE is False:
+    !az storage container create --account-name {STORAGE_ACCOUNT_NAME} \
+                                 --account-key {storage_account_key} \
+                                 --name {CONTAINER_NAME}
 
-!azcopy --source {DATA/"validation.tar.gz"} \
---destination https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{CONTAINER_NAME}/validation.tar.gz \
---dest-key {storage_account_key} --quiet
+# + {"tags": ["stripout"]}
+if USE_FAKE is False:
+    # Should take about 20 minutes
+    !azcopy --source {DATA/"train.tar.gz"} \
+    --destination https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{CONTAINER_NAME}/train.tar.gz \
+    --dest-key {storage_account_key} --quiet
+
+# + {"tags": ["stripout"]}
+if USE_FAKE is False:
+    !azcopy --source {DATA/"validation.tar.gz"} \
+    --destination https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{CONTAINER_NAME}/validation.tar.gz \
+    --dest-key {storage_account_key} --quiet
+# -
 
 # <a id='create_fileshare'></a>
-# ## Create Fileserver (Optional)
-# In this example we will store the data on an NFS fileshare. It is possible to use many storage solutions with Batch AI. NFS offers the best traideoff between performance and ease of use. The best performance is achieved by loading the data locally but this can be cumbersome since it requires that the data is download by the all the nodes which with the imagenet dataset can take hours. 
+# ## Create Fileserver
+# In this example we will store the data on an NFS fileshare. It is possible to use many storage solutions with Batch AI. NFS offers the best tradeoff between performance and ease of use. The best performance is achieved by loading the data locally but this can be cumbersome since it requires that the data is download by the all the nodes which with the ImageNet dataset can take hours. If you are using fake data we won't be using the fileserver but we will create one so that if you want to run the real ImageNet data later the server is ready.
 
+# + {"tags": ["stripout"]}
 !az batchai file-server create -n $NFS_NAME --disk-count 4 --disk-size 250 -w $WORKSPACE \
 -s Standard_DS4_v2 -u $USERNAME -p {get_password(dotenv_for())} -g $GROUP_NAME --storage-sku Premium_LRS
+# -
 
 !az batchai file-server list -o table -w $WORKSPACE -g $GROUP_NAME
 
@@ -176,16 +195,25 @@ with open('nodeprep.sh', 'w') as f:
 if USE_FAKE:
     raise Warning("You should not be running this section if you simply want to use fake data")
 
-!sshpass -p {get_password(dotenv_for())} scp -o "StrictHostKeyChecking=no" nodeprep.sh $USERNAME@{nfs_ip}:~/
+# + {"tags": ["stripout"]}
+if USE_FAKE is False:
+    !sshpass -p {get_password(dotenv_for())} scp -o "StrictHostKeyChecking=no" nodeprep.sh $USERNAME@{nfs_ip}:~/
 
-!sshpass -p {get_password(dotenv_for())} ssh -o "StrictHostKeyChecking=no" $USERNAME@{nfs_ip} "sudo chmod 777 ~/nodeprep.sh && ./nodeprep.sh"
+# + {"tags": ["stripout"]}
+if USE_FAKE is False:
+    !sshpass -p {get_password(dotenv_for())} ssh -o "StrictHostKeyChecking=no" $USERNAME@{nfs_ip} "sudo chmod 777 ~/nodeprep.sh && ./nodeprep.sh"
+# -
 
 # <a id='configure_cluster'></a>
 # ## Configure Batch AI Cluster
-# We then upload the scripts we wish to execute onto the fileshare. The fileshare will later be mounted by Batch AI. An alternative to uploading the scripts would be to embedd them inside the Docker container.
+# We then upload the scripts we wish to execute onto the fileshare. The fileshare will later be mounted by Batch AI. An alternative to uploading the scripts would be to embedd them inside the Docker image.
 
-# Below it the command to create the cluster.
+!az storage file upload --share-name $FILE_SHARE_NAME --source HorovodPytorch/cluster_config/docker.service --path scripts
+!az storage file upload --share-name $FILE_SHARE_NAME --source HorovodPytorch/cluster_config/nodeprep.sh --path scripts
 
+# Below it the command to create the cluster. 
+
+# + {"tags": ["stripout"]}
 !az batchai cluster create \
     -w $WORKSPACE \
     --name $CLUSTER_NAME \
@@ -200,11 +228,14 @@ if USE_FAKE:
     --storage-account-key $storage_account_key \
     --nfs $NFS_NAME \
     --nfs-mount-path nfs \
-    --config-file cluster_config/cluster.json
+    --config-file HorovodPytorch/cluster_config/cluster.json
+# -
 
 # Let's check that the cluster was created succesfully.
 
+# + {"tags": ["stripout"]}
 !az batchai cluster show -n $CLUSTER_NAME -w $WORKSPACE
+# -
 
 !az batchai cluster list -w $WORKSPACE -o table
 
