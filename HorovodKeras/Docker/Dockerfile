@@ -8,7 +8,7 @@ ENV NCCL_VERSION=2.2.13-1+cuda9.0
 
 RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
 
-RUN apt-get update && apt-get install -y --no-install-recommends\
+RUN apt-get update && apt-get install -y --no-install-recommends  --allow-downgrades --allow-change-held-packages \
         build-essential \
         cmake \
         cpio \
