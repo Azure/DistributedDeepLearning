@@ -1,7 +1,7 @@
 # Training Distributed Training on Batch AI
 
 This repo is a tutorial on how to train a CNN model in a distributed fashion using Batch AI. 
-The scenario is image classification, but the solution can be generalized for other deep learning scenarios such as segmentation and object detection. 
+The scenario covered is image classification, but the solution can be generalized for other deep learning scenarios such as segmentation and object detection. 
 
 ![Distributed training diagram](images/dist_training_diag2.png "Distributed training diagram")
 
@@ -28,6 +28,7 @@ be used for model parallel and asynchronous updates.
 * [NVidia Docker runtime](https://github.com/NVIDIA/nvidia-container-runtime) installed
 * [Dockerhub](https://hub.docker.com/) account
 * Port 9999 open on the VM or computer
+* ImageNet dataset (look at [this](00_DataProcessing.ipynb) notebook for details)
 
 ## Setup 
 Before you begin make sure you are logged into your dockerhub account by running on your machine:
@@ -54,7 +55,10 @@ make jupyter dockerhub=<dockerhub account> data=<data_location>
 ```
 
 This will start the Jupyter notebook on port 9999. Simply point your browser to the IP or DNS of your machine. 
-From there you can navigate to the folders for tutorials on the frameworks covered such a [HorovodTF](HorovodTF), [HorovodPytorch](HorovodPytorch) and [HorovodKeras](HorovodKeras).
+From there you can navigate to [00_DataProcessing.ipynb](00_DataProcessing.ipynb) to process the ImageNet Data.
+
+Once you have covered the two prerequisite notebooks folders [00_DataProcessing.ipynb](00_DataProcessing.ipynb) and [01_CreateResources.ipynb](01_CreateResources.ipynb)  you can 
+navigate to the tutorials for each of the frameworks [HorovodTF](HorovodTF), [HorovodPytorch](HorovodPytorch) and [HorovodKeras](HorovodKeras).
 
 
 
