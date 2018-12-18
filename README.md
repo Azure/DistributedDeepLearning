@@ -22,10 +22,10 @@ be used for model parallel and asynchronous updates.
 
 
 ## Prerequisites
-* Computer with NVidia GPU (The path was tested on an [Azure NC12 Ubuntu DSVM](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-gpu))
+* Computer with Nvidia GPU (The path was tested on an [Azure NC12 Ubuntu DSVM](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-gpu))
 * Linux 
 * [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) installed
-* [NVidia Docker runtime](https://github.com/NVIDIA/nvidia-container-runtime) installed
+* [Nvidia Docker runtime](https://github.com/NVIDIA/nvidia-container-runtime) installed
 * [Dockerhub](https://hub.docker.com/) account
 * Port 9999 open on the VM or computer
 * ImageNet dataset (look at [this](00_DataProcessing.ipynb) notebook for details)
