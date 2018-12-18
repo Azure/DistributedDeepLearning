@@ -1,57 +1,66 @@
 # Training Distributed Training on Batch AI
-Object recognition in images is a widely applied technique in computer vision applications. It is often implemented by training a convolutional deep neural network (CNN). The training process can take up to weeks on a single GPU, not to mention the the prohibitively long time needed when performing hyperparameter tuning or experimenting with model architectures.
 
-This repo shows how to train a CNN model in a distributed fashion using [Azure Batch AI](https://docs.microsoft.com/en-us/azure/batch-ai/overview), a managed service that enables deep learning (DL) models to be trained on clusters of Azure virtual machines, including VMs with GPU support. 
+This repo is a tutorial on how to train a CNN model in a distributed fashion using Batch AI. 
+The scenario covered is image classification, but the solution can be generalized for other deep learning scenarios such as segmentation and object detection. 
 
-We train CNN models ([ResNet50](https://arxiv.org/abs/1512.03385)) using [Horovod](https://github.com/uber/horovod) on the [Imagenet](http://www.image-net.org/) dataset. When training CNN models, we use three DL frameworks for you to choose from: TensorFlow, Keras, or PyTorch.  
+![Distributed training diagram](images/dist_training_diag2.png "Distributed training diagram")
 
-To get started with the tutorial, please proceed with following steps **in sequential order**.
+Image classification is a common task in computer vision applications and is often tackled by training a convolutional neural network (CNN). 
+For particularly large models with large datasets, the training process can take weeks or months on a single GPU. 
+In some situations, the models are so large that it isn’t possible to fit reasonable batch sizes onto the GPU. 
+Using distributed training in these situations helps shorten the training time. 
+In this specific scenario, a ResNet50 CNN model is trained using Horovod on the ImageNet dataset as well as on synthetic data. 
+The tutorial demonstrates how to accomplish this using three of the most popular deep learning frameworks: TensorFlow, Keras, and PyTorch.
+There are number of ways to train a deep learning model in a distributed fashion, including data parallel and model parallel approaches based on synchronous and asynchronous updates. 
+Currently the most common scenario is data parallel with synchronous updates—it’s the easiest to implement and sufficient for the majority of use cases. 
+In data parallel distributed training with synchronous updates the model is replicated across N hardware devices and a 
+mini-batch of training samples is divided into N micro-batches (see Figure 2). 
+Each device performs the forward and backward pass for a micro-batch and when it finishes the process it shares the 
+updates with the other devices. These are then used to calculate the updated weights of the entire mini-batch and then the 
+weights are synchronized across the models. This is the scenario that is covered in the GitHub repository. The same architecture though can 
+be used for model parallel and asynchronous updates.
 
- * [Prerequisites](#prerequisites)
- * [Setup](#setup)
- * [TensorFlow version](./HorovodTF)  or [Keras version](./HorovodKeras), or [PyTorch version](./HorovodPytorch) 
 
-<a id='prerequisites'></a>
 ## Prerequisites
-* Local host machine OS: Linux
-* Docker installed
+* Computer with Nvidia GPU (The path was tested on an [Azure NC12 Ubuntu DSVM](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-gpu))
+* Linux 
+* [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) installed
+* [Nvidia Docker runtime](https://github.com/NVIDIA/nvidia-container-runtime) installed
 * [Dockerhub](https://hub.docker.com/) account
-* Port 9999 open 
+* Port 9999 open on the VM or computer
+* ImageNet dataset (look at [this](00_DataProcessing.ipynb) notebook for details)
 
-<a id='setup'></a>
 ## Setup 
 Before you begin make sure you are logged into your dockerhub account by running on your machine:
 
 ```bash
 docker login 
 ```
-### Setup Batch AI Images
-We need to create the images that will run our code on Batch AI. For chosen framework, you first navigate to its corresponding directory and then build the docker image. Taking TensorFlow model as an example, you navigate to [HorovodTF folder](./HorovodTF) and run following command to build the image (replace any instance of <dockerhub account> with your own dockerhub account name):
 
-```bash
-make build dockerhub=<dockerhub account>
-```
 
-Then push the image to your registry with:
-
-```bash
-make push dockerhub=<dockerhub account>
-```
 
 ### Setup Execution Environment
-Before being able to run anything you will need to configure your machine (local host) to set up the environment in which you will be executing the Batch AI commands etc. There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. To build the image run (replace all instances of <dockerhub account> with your own dockerhub account name) following command in current directory:
+Before being able to run anything you will need to set up the environment in which you will be executing the Batch AI commands etc. 
+There are a number of dependencies therefore we offer a dockerfile that will take care of these dependencies for you. 
+If you don't want to use Docker simply look inside the Docker directory at the dockerfile and environment.yml file for the dependencies. 
+To build the container run(replace all instances of <dockerhub account> with your own dockerhub account name):
 
 ```bash
 make build dockerhub=<dockerhub account>
 ```
-Then start the jupyter notebook on port 9999: 
+
+The you run the command to start the environment (replace <data_location> with a location on your file system. Make sure it has at least 300GB of free space for the ImageNet dataset)
 ```bash
-make jupyter dockerhub=<dockerhub account>
+make jupyter dockerhub=<dockerhub account> data=<data_location>
 ```
 
-By following the instructions shown in the output messages of above command, simply point your browser to the IP or DNS of your machine. From there you can navigate to the folders for tutorials on the frameworks covered such as HorovodTF etc.
+This will start the Jupyter notebook on port 9999. Simply point your browser to the IP or DNS of your machine. 
+From there you can navigate to [00_DataProcessing.ipynb](00_DataProcessing.ipynb) to process the ImageNet Data.
 
-Alternatively, if you don't want to use Docker, you can look inside the Docker directory at the dockerfile and environment.yml file for the dependencies.
+Once you have covered the two prerequisite notebooks folders [00_DataProcessing.ipynb](00_DataProcessing.ipynb) and [01_CreateResources.ipynb](01_CreateResources.ipynb)  you can 
+navigate to the tutorials for each of the frameworks [HorovodTF](HorovodTF), [HorovodPytorch](HorovodPytorch) and [HorovodKeras](HorovodKeras).
+
+
 
 # Contributing
 

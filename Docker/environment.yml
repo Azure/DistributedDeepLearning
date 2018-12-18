@@ -10,9 +10,8 @@ dependencies:
   - jupyter
   - ipykernel
   - scikit-learn
-  - selenium
-  - phantomjs
   - pillow
   - bokeh=0.13.0
   - pip:
-    - python-dotenv[cli]  
+    - https://github.com/theskumar/python-dotenv/archive/master.zip
+    - docker
